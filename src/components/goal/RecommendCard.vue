@@ -23,15 +23,20 @@ const props = defineProps({
     <!-- 정책 카드(policy) -->
     <template v-if="type === 'policy' && policy">
     
-      <div class="card" style="display: flex;">
+      <div class="card">
+        <!-- 북마크 아이콘 -->
+        <i class="fa-regular fa-bookmark bookmark-icon"></i>
+        <!-- <i class="fa-solid fa-bookmark bookmark-icon"></i> -->
+
         <!-- 왼(이미지) -->
-        <div class="card-image" style="margin-right: 7px; margin-top: 2px;">
+        <div class="card-image">
           <img src="/images/goal/policy.png" alt="정책 이미지" style="width: 30px; height: 30px;"/>
+          <div class="grade">90점</div>
         </div>
 
         <!-- 오(내용) -->
         <div class="card-body">
-          <div style="display: flex;">
+          <div class="card-body-div">
             <p class="title"><strong>{{ policy.plcyNm }}</strong></p>
 
             <div style="">
@@ -42,6 +47,7 @@ const props = defineProps({
           </div>
 
           <p class="txt">{{ policy.plcyExplnCn }}</p>
+
           <p class="category">
             <span class="label">분류</span> {{ policy.lclsfNm }}
           </p>
@@ -69,10 +75,15 @@ const props = defineProps({
     <!-- 금융 상품 카드(product) -->
     <template v-else-if="type === 'product' && product">
 
-      <div class="card" style="display: flex;">
+      <div class="card">
+        <!-- 북마크 아이콘 -->
+        <i class="fa-regular fa-bookmark bookmark-icon"></i>
+        <!-- <i class="fa-solid fa-bookmark bookmark-icon"></i> -->
+
         <!-- 왼(이미지) -->
-        <div class="card-image" style="margin-right: 7px; margin-top: 2px;">
+        <div class="card-image">
           <img src="/images/goal/kb.png" alt="정책 이미지" style="width: 30px; height: 30px;"/>
+          <div class="grade">90점</div>
         </div>
 
         <!-- 오(내용) -->
@@ -149,6 +160,41 @@ const props = defineProps({
 
 .recommend-card .url {
   margin-bottom: 0;
+}
+
+/* 카드 */
+.card{
+  display: flex; 
+  position: relative;
+}
+
+/* 북마크 */
+.bookmark-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 18px;
+  /* color: #569FFF; */
+  color: #757575;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* 왼(이미지) */
+.card-image{
+  margin-right: 7px; 
+  margin-top: 2px;
+}
+.grade{
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* 오(내용) */
+.card-body{}
+
+.card-body-div{
+  display: flex;
 }
 
 .title{

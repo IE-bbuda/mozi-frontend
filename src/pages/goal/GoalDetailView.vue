@@ -1,7 +1,9 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import RecommendSection from '@/components/goal/RecommendSection.vue';
 import GoalCompletePopup from '@/components/goal/GoalCompletePopup.vue';
+import ProgressBar from '@/components/goal/ProgressBar.vue';
+
 import db from '@/data/db.json';
 
 import { useRoute } from 'vue-router';
@@ -69,21 +71,25 @@ const showCompletePopup = ref(false);
 const closePopup = () => {
   showCompletePopup.value = false;
 };
+
+// 목표 달성 여부 (goal_status === false가 '달성 완료')
+const goalAchieved = computed(() => goal.value?.goal_status === false);
+
 </script>
 
 <template>
   <!-- <h1>목표 상세 페이지</h1> -->
 
   <!-- 상단-->
-  <div style="display: flex; text-align: center">
+  <div class="top">
     <!-- 뒤로가기 -->
-    <div style="margin-top: 20px; margin-left: 20px">
+    <div class="top-backbtn">
       <router-link to="/goal">
         <i class="fa-solid fa-chevron-left"></i>
       </router-link>
     </div>
     <!-- 제목 -->
-    <div style="align-items: center; margin-left: 110px">
+    <div class="top-title">
       <h3 style="text-align: center">목표 상세보기</h3>
     </div>
   </div>
@@ -91,16 +97,17 @@ const closePopup = () => {
   <!-- 내용 시작 -->
   <div v-if="goal" class="goal-detail">
     <!-- 목표 정보 영역 -->
-    <div class="section">
-      <div class="goal-info" style="display: flex">
-        <div style="align-items: center; margin-left: 50px">
+    <div class="goal-info">
+      <div class="goal-top">
+
+        <div class="mygoal">
           <h3>나의 목표 : {{ goal.goal_name }}</h3>
         </div>
 
-        <div class="icon" style="margin-top: 20px; margin-left: 30px">
+        <div class="icon">
           <!-- 수정 -->
           <router-link :to="`/goal/${goalId}/edit`">
-            <i class="fa-solid fa-pen-to-square" style="margin-right: 10px"></i>
+            <i class="fa-solid fa-pen-to-square update"></i>
           </router-link>
 
           <!-- 삭제 -->
@@ -141,20 +148,44 @@ const closePopup = () => {
         </div>
         <!-- end icon -->
       </div>
-      <!-- end goal-info -->
+      <!-- end goal-top -->
 
       <!-- 진행률 바 -->
       <!-- <ProgressBar/> -->
+      <!-- 진행률 바 삽입 -->
+      <ProgressBar
+        style="width: 270px;"
+        :current="goal.current_amount"
+        :target="goal.target_amount"
+      />
+      <!-- 금액 정보 표시 -->
+      <!-- <div class="amount-text">
+        <p>
+          <span class="amount-label">현재:</span>
+          <span class="amount-value">{{ goal.current_amount.toLocaleString() }}원</span>
+        </p>
+        <p>
+          <span class="amount-label">목표:</span>
+          <span class="amount-value">{{ goal.target_amount.toLocaleString() }}원</span>
+        </p>
+      </div> -->
 
       <!-- <p>목표 금액: {{ goal.target_amount.toLocaleString() }} 원</p> -->
 
+      <!-- 키워드 -->
       <div class="goal-keyword">
         <p>#{{ goal.keyword }}</p>
       </div>
 
-      <div class="goal-guide">
-        <p>목표 달성 가이드</p>
-        <p>이 속도로 쭉~!</p>
+      <!-- 목표 달성 여부에 따라 다른 안내 메시지 -->
+      <!-- 달성o : 축하 메세지 -->
+      <div v-if="goalAchieved" class="goal-complete">
+        <p>🎉 목표를 모두 달성했어요!</p>
+      </div>
+      <!-- 달성x : 목표 달성 가이드 -->
+      <div v-else class="goal-guide">
+        <p class="guide">💡목표 달성 가이드</p>
+        <p class="comment">조금씩 꾸준히, 목표 자산에 가까워지고 있어요. 오늘도 한 발짝!</p>        
       </div>
 
       <!-- 토글 버튼 (펼치기)-->
@@ -167,24 +198,24 @@ const closePopup = () => {
         <!-- 날짜 -->
         <div class="goal-date">
           <div class="goal-date-target">
-            <p>목표 달성일</p>
+            <p><span class="label">목표 달성일</span></p>
             <p>{{ formatDate(goal.goal_date) }}</p>
           </div>
           <div class="goal-date-expect">
-            <p>예상 달성일</p>
+            <p><span class="label">예상 달성일</span></p>
             <p>2030-12-31</p>
           </div>
         </div>
 
         <!-- 메모 -->
         <div class="goal-memo">
-          <p>메모</p>
+          <p><span class="label">메모</span></p>
           <p>{{ goal.memo }}</p>
         </div>
 
         <!-- 선택 계좌 -->
         <div class="goal-account">
-          <p>선택계좌</p>
+          <p><span class="label">선택계좌</span></p>
 
           <div style="margin-bottom: 20px">
             <div>
@@ -209,11 +240,16 @@ const closePopup = () => {
       </div>
       <!-- end toggle-down -->
     </div>
-    <!-- end section -->
+    <!-- end goal-info -->
 
-    <!-- 맞춤형 추천 영역-->
-    <div>
-      <!-- <RecommendSection :keyword="goal.keyword" /> -->
+    <!-- 목표 달성 여부에 따라 다른 추천 영역 -->
+    <!-- 달성o : 자산관리 사이트 -->
+    <div v-if="goalAchieved" class="asset-management">
+      <h3>목표 달성! 자산 성장 모드 ON</h3>
+      <p><a href="#">자산관리 사이트</a></p>
+    </div>
+    <!-- 달성x : 맞춤형 추천 영역-->
+    <div v-else>
       <RecommendSection />
     </div>
 
@@ -229,12 +265,27 @@ const closePopup = () => {
 </template>
 
 <style scoped>
+/* 상단 */
+.top{
+  display: flex; 
+  text-align: center
+}
+.top-backbtn{
+  margin-top: 20px; 
+  margin-left: 20px
+}
+.top-title{
+  align-items: center; 
+  margin-left: 110px
+}
+
+/* 내용 시작 */
 .goal-detail {
   margin: 0;
   padding: 0;
 }
 
-.section {
+.goal-info {
   margin: 20px;
   border: 1px solid #d9d9d9;
   border-radius: 5px;
@@ -246,6 +297,51 @@ const closePopup = () => {
   align-items: center;
 }
 
+.goal-top{
+  display: flex
+}
+
+.mygoal{
+  align-items: center; 
+  margin-left: 50px
+}
+
+.icon{
+  margin-top: 20px; 
+  margin-left: 30px
+}
+.update{
+  margin-right: 10px
+}
+
+/* 삭제버튼(모달) -> 아래쪽에 */
+
+/* 진행률 바 */
+/* 진행률 바 (금액) */
+/* .amount-text {
+  text-align: left;
+  width: 310px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.amount-text p {
+  margin: 2px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.amount-label {
+  color: #555;
+  font-weight: 500;
+}
+
+.amount-value {
+  color: #222;
+  font-weight: bold;
+} */
+
+/* 키워드 */
 .goal-keyword > p {
   display: inline-block;
   padding: 7px;
@@ -257,11 +353,47 @@ const closePopup = () => {
   line-height: 1;
 }
 
+/* 목표 달성 가이드 */
+.goal-complete{
+  border-radius: 5px;
+  padding: 10px 63px;
+  background: linear-gradient(90deg, #ffd700, #ffed4e, #ffd700);
+  margin-bottom: 10px;
+}
+.goal-complete>p{
+  font-weight: 500;
+}
+
 .goal-guide {
   border: 1px solid #d9d9d9;
   border-radius: 5px;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  /* box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); */
   width: 310px;
+  /* background-color: #64BAAA; */
+  background-color: rgba(100, 186, 170, 0.5);
+  margin-bottom: 10px;
+  
+}
+.guide{
+  color: white;
+  /* text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); */
+}
+.comment{
+  color: #3f3f3f;
+  font-weight: 500;
+  padding: 5px;
+}
+
+.asset-management{
+    margin: 20px;
+  border: 1px solid #d9d9d9;
+  border-radius: 5px;
+  text-align: center;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* 토글 */
@@ -274,6 +406,7 @@ const closePopup = () => {
   user-select: none;
 }
 
+/* 토글 아래 내용 */
 .goal-date-target,
 .goal-date-expect,
 .goal-memo,
@@ -305,6 +438,12 @@ const closePopup = () => {
   margin-bottom: 20px;
   margin-left: 6px;
 }
+
+.label{
+  color: #bebebe;
+}
+
+
 
 /* 모달 스타일 (삭제 버튼)*/
 .delete-btn {

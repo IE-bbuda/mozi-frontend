@@ -34,19 +34,20 @@ function selectTab(tab) {
 <template>
   <div class="recommendation-list">
     
-    <div style="display: flex;">
-      <div style="margin-top: 20px; margin-left: 15px;">
+    <!-- 상단 -->
+    <div class="top">
+      <div class="top-backbtn">
         <router-link :to="`/goal/${goalId}`">
           <i class="fa-solid fa-chevron-left"></i>
         </router-link>
       </div>
-      <div style="margin-left: 110px;">
-        <h3 style="text-align: center;">추천 결과</h3>
+      <div class="top-title">
+        <h3>추천 결과</h3>
       </div>
     </div>
 
     <!-- 탭 버튼 -->
-    <div style="display: flex; justify-content: center; margin: 0;">
+    <div class="tab">
       <button
         :class="{ active: activeTab === 'policy' }"
         @click="selectTab('policy')"
@@ -83,6 +84,29 @@ function selectTab(tab) {
   max-width: 350px;
   margin: 0 auto;
 }
+
+/* 상단 */
+.top{
+  display: flex;
+}
+.top-backbtn{
+  margin-top: 20px; 
+  margin-left: 15px;
+}
+.top-title{
+  margin-left: 110px;
+}
+.top-title>h3{
+  text-align: center
+}
+
+/* 탭 */
+.tab{
+  display: flex; 
+  justify-content: center; 
+  margin: 0;
+}
+
 
 button {
   padding: 8px 16px;

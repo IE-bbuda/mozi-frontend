@@ -32,11 +32,11 @@ const productData = depositProduct ? {
     <div class="goal-recommend">
       <!-- 정책 -->
       <div>
-        <div style="display: flex; text-align: center; margin-left: 100px;">
+        <div class="card-title">
           <div>
             <p>맞춤형 정책 제안</p>
           </div>
-          <div style="margin-top: 15px; margin-left: 80px;">
+          <div class="plusbtn">
             <router-link :to="`/goal/${goalId}/recommendations?tab=policy`">
               <i class="fa-solid fa-plus"></i>
             </router-link>
@@ -50,11 +50,11 @@ const productData = depositProduct ? {
 
       <!-- 금융 -->
       <div>
-        <div style="display: flex; text-align: center; margin-left: 100px;">
+        <div class="card-title">
           <div>
             <p>맞춤형 금융 상품</p>
           </div>
-          <div style="margin-top: 15px; margin-left: 80px;">
+          <div class="plusbtn">
             <router-link :to="`/goal/${goalId}/recommendations?tab=product`">
               <i class="fa-solid fa-plus"></i>
             </router-link>
@@ -88,6 +88,18 @@ const productData = depositProduct ? {
   /* display: flex; */
   flex-direction: column;
   align-items: center;
+}
+
+/* 카드 */
+.card-title{
+  display: flex; 
+  text-align: center; 
+  margin-left: 100px;
+}
+
+.plusbtn{
+  margin-top: 15px; 
+  margin-left: 80px;
 }
 
 </style>
