@@ -1,108 +1,112 @@
 <template>
-  <div class="container py-4">
-    <!-- 뒤로가기 버튼 -->
-    <div class="d-flex align-items-center mb-3">
-      <button class="btn btn-outline-secondary me-2" @click="router.back()">
-        ←
+  <div class="policy-detail">
+    <!-- 🔙 상단 뒤로가기 -->
+    <header class="header">
+      <button class="back-btn" @click="router.back()">
+        <i class="fa-solid fa-arrow-left"></i>
       </button>
-    </div>
-    <!-- 🔹 상단: 제목 + 태그 -->
-    <div class="mb-3">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <span class="badge bg-secondary me-1">{{ policy.lclsfNm }}</span>
-          <span class="badge bg-danger">{{ policy.mclsfNm }}</span>
-        </div>
+    </header>
+
+    <main class="content">
+      <!-- 정책 카테고리 -->
+      <div class="tags">
+        <span class="tag main">{{ policy.lclsfNm }}</span>
+        <span class="tag sub">{{ policy.mclsfNm }}</span>
       </div>
-      <h4 class="fw-bold">{{ policy.plcyNm }}</h4>
-    </div>
 
-    <!-- 🔹 정책 요약 설명 -->
-    <div class="alert alert-light small">
-      {{ policy.plcyExplnCn }}
-    </div>
+      <!-- 정책명 -->
+      <h1 class="title">{{ policy.plcyNm }}</h1>
 
-    <!-- 🔹 키워드 -->
-    <div class="mb-3">
-      <span
-        class="badge bg-light text-dark border me-1"
-        v-for="(kw, i) in (policy.plcyKywdNm || '').split(',')"
-        :key="i"
-      >
-        #{{ kw.trim() }}
-      </span>
-    </div>
+      <!-- 요약 -->
+      <p class="summary">{{ policy.plcyExplnCn }}</p>
 
-    <!-- 🔹 한 눈에 보는 정책 요약 -->
-    <div class="border p-3 rounded mb-4 bg-white">
-      <h6 class="fw-bold mb-3">한 눈에 보는 정책 요약</h6>
-      <ul class="list-unstyled mb-0 small">
-        <li><strong>정책번호:</strong> {{ policy.plcyNo }}</li>
-        <li><strong>정책분야:</strong> {{ policy.mclsfNm }}</li>
-        <li><strong>지원내용:</strong> {{ policy.plcySprtCn }}</li>
-        <li>
-          <strong>신청기간:</strong>
-          {{ formatPeriod(policy.bizPrdBgngYmd, policy.bizPrdEndYmd) }}
-        </li>
-      </ul>
-    </div>
-
-    <!-- 🔹 신청자격 -->
-    <div class="border p-3 rounded mb-4 bg-white">
-      <h6 class="fw-bold mb-3">신청자격</h6>
-      <div class="small">
-        <div class="mb-1">
-          <strong>연령:</strong> {{ policy.sprtTrgtMinAge }}세 ~
-          {{ policy.sprtTrgtMaxAge }}세
-        </div>
-        <div class="mb-1"><strong>거주지역:</strong> {{ formatZipCode() }}</div>
-        <div class="mb-1">
-          <strong>소득조건:</strong>
-          {{ convertLabel(policy.earnCndSeCd, 'income') }}
-        </div>
-        <div
-          class="mb-1"
-          v-if="policy.earnMinAmt || policy.earnMaxAmt || policy.earnEtcCn"
-        >
-          <strong>소득금액:</strong>
-          <span v-if="policy.earnMinAmt"
-            >최소 {{ policy.earnMinAmt }}만원
-          </span>
-          <span v-if="policy.earnMaxAmt"
-            >~ 최대 {{ policy.earnMaxAmt }}만원
-          </span>
-          <span v-if="policy.earnEtcCn">({{ policy.earnEtcCn }})</span>
-        </div>
-        <div class="mb-1">
-          <strong>학력:</strong> {{ convertLabel(policy.schoolCd, 'school') }}
-        </div>
-        <div class="mb-1">
-          <strong>전공:</strong> {{ convertLabel(policy.plcyMajorCd, 'major') }}
-        </div>
-        <div class="mb-1">
-          <strong>취업 상태:</strong> {{ convertLabel(policy.jobCd, 'job') }}
-        </div>
-        <div class="mb-1">
-          <strong>혼인 여부:</strong>
-          {{ convertLabel(policy.mrgSttsCd, 'marriage') }}
-        </div>
-        <div>
-          <strong>특화 분야:</strong>
-          {{ convertLabel(policy.sBizCd, 'specialty') }}
-        </div>
+      <!-- 키워드 -->
+      <div class="keywords" v-if="policy.plcyKywdNm">
+        <span v-for="(kw, i) in policy.plcyKywdNm.split(',')" :key="i" class="keyword">
+          #{{ kw.trim() }}
+        </span>
       </div>
-    </div>
 
-    <!-- 신청 정보 -->
-    <div class="border p-3 rounded bg-white">
-      <h6 class="fw-bold mb-3">📎 신청 정보</h6>
-      <p class="small">
-        <strong>신청 URL:</strong>
-        <a :href="policy.aplyUrlAddr" target="_blank" rel="noopener noreferrer">
-          {{ policy.aplyUrlAddr }}
-        </a>
-      </p>
-    </div>
+      <!-- 한눈에 보는 정책 -->
+      <section class="section card">
+        <h2>한눈에 보는 정책</h2>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="label">정책번호</span>
+            <span>{{ policy.plcyNo }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">정책분야</span>
+            <span>{{ policy.mclsfNm }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">지원내용</span>
+            <span>{{ policy.plcySprtCn }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">신청기간</span>
+            <span>{{ formatPeriod(policy.bizPrdBgngYmd, policy.bizPrdEndYmd) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 신청자격 -->
+      <section class="section card">
+        <h2>신청자격</h2>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="label">연령</span>
+            <span>{{ policy.sprtTrgtMinAge }}세 ~ {{ policy.sprtTrgtMaxAge }}세</span>
+          </div>
+          <div class="info-row">
+            <span class="label">거주지역</span>
+            <span>{{ formatZipCode() }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">소득조건</span>
+            <span>{{ convertLabel(policy.earnCndSeCd, 'income') }}</span>
+          </div>
+          <div class="info-row" v-if="policy.earnMinAmt || policy.earnMaxAmt || policy.earnEtcCn">
+            <span class="label">소득금액</span>
+            <span>
+              <span v-if="policy.earnMinAmt">최소 {{ formatCurrency(policy.earnMinAmt) }}</span>
+              <span v-if="policy.earnMaxAmt"> ~ 최대 {{ formatCurrency(policy.earnMaxAmt) }}</span>
+              <span v-if="policy.earnEtcCn"> ({{ policy.earnEtcCn }})</span>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="label">학력</span>
+            <span>{{ convertLabel(policy.schoolCd, 'school') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">전공</span>
+            <span>{{ convertLabel(policy.plcyMajorCd, 'major') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">취업 상태</span>
+            <span>{{ convertLabel(policy.jobCd, 'job') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">혼인 여부</span>
+            <span>{{ convertLabel(policy.mrgSttsCd, 'marriage') }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">특화 분야</span>
+            <span>{{ convertLabel(policy.sBizCd, 'specialty') }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 신청 정보 -->
+      <section class="section card">
+        <h2>신청 정보</h2>
+        <p class="link">
+          <a :href="policy.aplyUrlAddr" target="_blank" rel="noopener noreferrer">
+            {{ policy.aplyUrlAddr }}
+          </a>
+        </p>
+      </section>
+    </main>
   </div>
 </template>
 
@@ -115,7 +119,7 @@ import { fetchRegionNamesByZipCodes } from '@/api/regionApi';
 const route = useRoute();
 const router = useRouter();
 const policy = ref({});
-const regionNames = ref([]); // 지역명 목록
+const regionNames = ref([]);
 
 onMounted(async () => {
   const id = route.params.id;
@@ -123,26 +127,27 @@ onMounted(async () => {
     const res = await policyApi.get(id);
     policy.value = res;
 
-    // zipCd → 지역명 변환
     if (res.zipCd) {
       const zipList = res.zipCd.split(',').map((z) => z.trim());
-      const names = await fetchRegionNamesByZipCodes(zipList);
-      regionNames.value = names;
+      regionNames.value = await fetchRegionNamesByZipCodes(zipList);
     }
   } catch (err) {
     console.error('정책 상세 조회 실패:', err);
   }
 });
-// 날짜 포맷
+
 const formatPeriod = (start, end) => {
   if (!start && !end) return '상시';
-  return `${start || '미정'} ~ ${end || '미정'}`;
+  const format = (date) => date?.replace(/-/g, '.') || '미정';
+  return `${format(start)} ~ ${format(end)}`;
 };
 
 const formatZipCode = () => {
   if (!regionNames.value || regionNames.value.length === 0) return '제한 없음';
   return regionNames.value.join(', ');
 };
+
+const formatCurrency = (value) => `${value}만원`;
 
 const convertLabel = (code, type) => {
   const map = {
@@ -209,13 +214,116 @@ const convertLabel = (code, type) => {
 </script>
 
 <style scoped>
-h6 {
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.4rem;
+.policy-detail {
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.content {
+  padding: 1rem;
+}
+
+.tags {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+}
+
+.tag.main {
+  background: #f2f4f6;
+  color: #333;
+}
+
+.tag.sub {
+  background: #e6f0ff;
+  color: #007bff;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.summary {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
   margin-bottom: 1rem;
 }
 
-.small > div {
-  margin-bottom: 0.5rem;
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.keyword {
+  font-size: 0.75rem;
+  color: #007bff;
+  background: #f5f9ff;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.section.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.link a {
+  color: #007bff;
+  font-size: 0.9rem;
+  text-decoration: none;
 }
 </style>

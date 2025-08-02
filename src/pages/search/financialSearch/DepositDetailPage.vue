@@ -310,7 +310,7 @@ onMounted(async () => {
 
 .info-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* ← 세로 정렬 */
   align-items: flex-start;
   padding: 16px 0;
   border-bottom: 1px solid #f2f3f5;
@@ -321,18 +321,17 @@ onMounted(async () => {
 }
 
 .info-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #8b95a1;
   font-weight: 500;
-  min-width: 80px;
+  margin-bottom: 4px; /* ← label과 value 간 여백 */
 }
 
 .info-value {
   font-size: 14px;
   color: #191f28;
-  text-align: right;
-  flex: 1;
-  margin-left: 16px;
+  width: 100%; /* 텍스트를 줄바꿈 가능하게 */
+  line-height: 1.4;
 }
 
 /* 예금자보호 섹션 */

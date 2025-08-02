@@ -1,20 +1,23 @@
 <template>
   <div class="financial-card">
     <div class="card-header" style="display: flex; align-items: center;">
-      <img class="bank-logo" :src="deposit.logoUrl || defaultLogo" alt="은행로고" style="width: 32px; height: 32px; margin-right: 8px;" />
-      <span class="product-title" style="font-weight: bold; font-size: 14px;">{{ deposit.productName }}</span>
-      <i class="fa-regular fa-bookmark bookmark" style="margin-left: auto;"></i>
+      <img class="bank-logo" :src="getBankLogoUrl(deposit?.bankCode)" alt="은행로고" style="width: 32px; height: 32px; margin-right: 8px;" />
+      <span class="product-title" style="font-weight: bold; font-size: 14px;">{{ deposit?.productName || '상품명 없음' }}</span>
+      <i class="fa-regular fa-bookmark bookmark" 
+         :class="{ 'scraped': isScraped }" 
+         @click="toggleScrap" 
+         style="margin-left: auto; cursor: pointer;"></i>
     </div>
     <div class="card-body" v-if="bestOption">
       
       <div class="rate small-text">
-        <span style="color: #888;">가입 </span><span style="color: #444;">{{ deposit.bankName }}</span><br>
+        <span style="color: #888;">가입 </span><span style="color: #444;">{{ deposit?.bankName || '은행명 없음' }}</span><br>
         <span style="color: #888;">금리 </span>
         <span class="main-rate">{{ bestOption.intrRate }}%({{ bestOption.saveTrm }}개월)</span>,<span class="max-rate" style="color: #e74c3c;">최고 {{ bestOption.intrRate2 }}%</span>({{ bestOption.saveTrm }}개월)
       </div>
       <div class="target small-text" style="color: #888;">
         <span>대상 </span>
-        <span style="color: #444;">{{ deposit.target || deposit.joinMember || '정보 없음' }}</span>
+        <span style="color: #444;">{{ deposit?.target || deposit?.joinMember || '정보 없음' }}</span>
       </div>
     </div>
     <div class="button-container">
@@ -24,39 +27,100 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getBankLogoUrl } from './util/bankLogo.js';
+import axios from 'axios';
 
 const props = defineProps({
   deposit: Object,
   productType: String
 });
-const defaultLogo = '/default-bank-logo.png';
 const router = useRouter();
+const isScraped = ref(false);
 
 const bestOption = computed(() => {
-  if (!props.deposit.options || props.deposit.options.length === 0) return null;
+  if (!props.deposit?.options || props.deposit.options.length === 0) return null;
   return props.deposit.options.reduce((max, cur) =>
     Number(cur.intrRate) > Number(max.intrRate) ? cur : max
   );
 });
 
-const goToDetail = () => {
-  console.log('Product Type:', props.productType);
-  console.log('Deposit Data:', props.deposit);
-  
-  if (props.productType === '적금') {
-    // 적금 상품의 경우 savingId 사용
-    const savingId = props.deposit.savingId;
-    console.log('Navigating to saving detail:', `/financialSearch/saving/${savingId}`);
-    router.push(`/financialSearch/saving/${savingId}`);
-  } else {
-    // 예금 상품의 경우 depositId 사용
-    const depositId = props.deposit.depositId;
-    console.log('Navigating to deposit detail:', `/financialSearch/deposit/${depositId}`);
-    router.push(`/financialSearch/deposit/${depositId}`);
+// 스크랩 상태 확인
+const checkScrapStatus = async () => {
+  try {
+    const userId = 1; // 임시로 고정된 사용자 ID
+    const response = await axios.get('/api/scrap/finance', {
+      params: { userId }
+    });
+    
+    const productId = props.productType === '적금' ? props.deposit?.savingId : props.deposit?.depositId;
+    const productType = props.productType === '적금' ? 'SAVING' : 'DEPOSIT';
+    
+    const isAlreadyScraped = response.data.some(scrap => 
+      scrap.productType === productType && 
+      ((productType === 'SAVING' && scrap.product.savingId === productId) ||
+       (productType === 'DEPOSIT' && scrap.product.depositId === productId))
+    );
+    
+    isScraped.value = isAlreadyScraped;
+  } catch (error) {
+    console.error('스크랩 상태 확인 실패:', error);
   }
 };
+
+// 스크랩 토글 함수
+const toggleScrap = async () => {
+  try {
+    const userId = 1; // 임시로 고정된 사용자 ID
+    const productId = props.productType === '적금' ? props.deposit?.savingId : props.deposit?.depositId;
+    const productType = props.productType === '적금' ? 'SAVING' : 'DEPOSIT';
+    
+    if (!productId) {
+      console.error('상품 ID가 없습니다.');
+      return;
+    }
+    
+    if (isScraped.value) {
+      // 스크랩 삭제
+      await axios.delete('/api/scrap/finance', {
+        params: { userId, productType, productId }
+      });
+      isScraped.value = false;
+      console.log('스크랩이 삭제되었습니다.');
+    } else {
+      // 스크랩 추가
+      await axios.post('/api/scrap/finance', null, {
+        params: { userId, productType, productId }
+      });
+      isScraped.value = true;
+      console.log('스크랩이 추가되었습니다.');
+    }
+  } catch (error) {
+    console.error('스크랩 토글 실패:', error);
+  }
+};
+
+const goToDetail = () => {
+  if (!props.deposit) return;
+  
+  if (props.productType === '적금') {
+    const savingId = props.deposit.savingId;
+    if (savingId) {
+      router.push(`/financialSearch/saving/${savingId}`);
+    }
+  } else {
+    const depositId = props.deposit.depositId;
+    if (depositId) {
+      router.push(`/financialSearch/deposit/${depositId}`);
+    }
+  }
+};
+
+// 컴포넌트 마운트 시 스크랩 상태 확인
+onMounted(() => {
+  checkScrapStatus();
+});
 </script>
 
 <style scoped>
@@ -89,6 +153,17 @@ const goToDetail = () => {
   color: #bdbdbd;
   font-size: 1.2rem;
   margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.bookmark.scraped {
+  color: #569FFF;
+}
+
+.bookmark.scraped::before {
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  content: "\f02e";
 }
 .card-body {
   font-size: 0.97rem;

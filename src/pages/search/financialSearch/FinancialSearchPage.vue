@@ -132,7 +132,7 @@ const fetchDeposits = async () => {
     console.error('예금 데이터 불러오기 실패:', e);
   }
 };
-// 적적금 데이터 불러오기 함수
+// 적금 데이터 불러오기 함수
 const fetchSavings = async () => {
   try {
     const res = await axios.get('/api/savings');

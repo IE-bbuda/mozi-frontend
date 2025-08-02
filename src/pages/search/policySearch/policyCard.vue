@@ -1,91 +1,52 @@
 <template>
-  <div class="card shadow-sm mb-3 policy-card">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-start">
-        <!-- 정책 이미지 + 정책명 + 중간 정보 -->
-        <div class="d-flex">
-          <!-- 이미지 -->
-          <img
-            src="/images/goal/policy.png"
-            alt="정책 이미지"
-            style="width: 25px; height: 25px; margin-right: 8px"
-          />
-
-          <!-- 정책명 + 중간정보 수직 정렬 -->
-          <div>
-            <!-- 정책명 -->
-            <h6 class="fw-bold mb-2">{{ policy.plcyNm }}</h6>
-
-            <!-- 분야, 연령, 기간 -->
-            <div class="small text-muted" style="margin-left: 2px">
-              <div>
-                분야
-                <span class="text-dark fw-semibold">{{
-                  policy.mclsfNm || '-'
-                }}</span>
-                <!-- {{ policy.zipCd }} -->
-              </div>
-              <div>
-                연령
-                <span
-                  class="text-dark fw-semibold"
-                  v-if="policy.sprtTrgtMinAge || policy.sprtTrgtMaxAge"
-                >
-                  만 {{ policy.sprtTrgtMinAge || '?' }}세 ~ 만
-                  {{ policy.sprtTrgtMaxAge || '?' }}세
-                </span>
-                <span class="text-dark fw-semibold" v-else>누구나</span>
-              </div>
-              <div>
-                기간
-                <span class="text-dark fw-semibold">
-                  <template
-                    v-if="!policy.bizPrdBgngYmd && !policy.bizPrdEndYmd"
-                  >
-                    상시
-                  </template>
-                  <template v-else>
-                    {{ policy.bizPrdBgngYmd }} ~ {{ policy.bizPrdEndYmd }}
-                  </template>
-                </span>
-              </div>
-            </div>
-          </div>
+  <div class="policy-card">
+    <div class="card-header">
+      <img
+        src="/images/goal/policy.png"
+        alt="정책 이미지"
+        class="policy-icon"
+      />
+      <span class="policy-title">{{ policy?.plcyNm || '정책명 없음' }}</span>
+      <i class="fa-regular fa-bookmark bookmark" 
+         :class="{ 'scraped': bookmarked }" 
+         @click="toggleBookmark" 
+         style="margin-left: auto; cursor: pointer;"></i>
+    </div>
+    
+    <div class="card-body" v-if="policy">
+      <div class="info-section">
+        <div class="info-item">
+          <span class="label">분야</span>
+          <span class="value">{{ policy.mclsfNm || '정보 없음' }}</span>
         </div>
-
-        <!-- 북마크 -->
-        <div class="text-end">
-          <i
-            class="fa-bookmark ms-4"
-            :class="
-              bookmarked ? 'fa-solid text-primary' : 'fa-regular text-secondary'
-            "
-            style="cursor: pointer"
-            @click="toggleBookmark"
-          ></i>
-        </div>
-      </div>
-
-      <!-- 키워드 태그 + 상세 버튼 -->
-      <div class="mt-2 d-flex justify-content-between align-items-center">
-        <div class="d-flex flex-wrap gap-1">
-          <span
-            class="badge bg-light text-dark"
-            v-for="(kw, i) in (policy.plcyKywdNm || '').split(',')"
-            :key="i"
-          >
-            {{ kw.trim() }}
+        <div class="info-item">
+          <span class="label">연령</span>
+          <span class="value" v-if="policy.sprtTrgtMinAge || policy.sprtTrgtMaxAge">
+            만 {{ policy.sprtTrgtMinAge || '?' }}세 ~ 만 {{ policy.sprtTrgtMaxAge || '?' }}세
           </span>
+          <span class="value" v-else>누구나</span>
         </div>
-
-        <!--  상세 버튼 -->
-        <RouterLink
-          :to="{ name: 'policyDetail', params: { id: policy.policyId } }"
-          class="btn btn-outline-primary btn-sm"
-        >
-          상세 보기
-        </RouterLink>
       </div>
+      
+    </div>
+    
+    <div class="bottom-section">
+      <div class="keywords-section">
+        <span
+          class="keyword-tag"
+          v-for="(kw, i) in (policy.plcyKywdNm || '').split(',')"
+          :key="i"
+        >
+          {{ kw.trim() }}
+        </span>
+      </div>
+      
+      <RouterLink
+        :to="{ name: 'policyDetail', params: { id: policy?.policyId } }"
+        class="detail-btn"
+      >
+        자세히보기
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -134,11 +95,13 @@ const toggleBookmark = async () => {
 
 <style scoped>
 .policy-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 16px 18px 12px 18px;
+  margin-bottom: 16px;
+  width: 100%;
   position: relative;
-  border-radius: 12px;
-  background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
 }
 
 /* 그라디언트 왼쪽 바 - 투명도 70% */
@@ -150,8 +113,102 @@ const toggleBookmark = async () => {
   width: 6px;
   height: 100%;
   background: linear-gradient(to bottom, #ff0000 0%, #000dff 55%);
-  opacity: 0.7; /* 🔹 투명도 설정 */
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
+  opacity: 0.7;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.policy-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+}
+
+.policy-title {
+  font-weight: bold;
+  font-size: 14px;
+  color: #222;
+  flex: 1;
+}
+
+.bookmark {
+  color: #bdbdbd;
+  font-size: 1.2rem;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+}
+
+.bookmark.scraped {
+  color: #569FFF;
+  font-weight: 900;
+}
+
+.card-body {
+  font-size: 0.97rem;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.info-section {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.info-item {
+  margin-bottom: 2px;
+}
+
+.info-item .label {
+  color: #888;
+  font-weight: 600;
+}
+
+.info-item .value {
+  color: #444;
+  margin-left: 4px;
+}
+
+.bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.keywords-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+.keyword-tag {
+  background: #f5f5f5;
+  color: #666;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.detail-btn {
+  background: #f5f5f5;
+  color: #aaa;
+  border: none;
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 0.85rem;
+  min-height: 24px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  line-height: 20px;
+  margin-left: 8px;
 }
 </style>
