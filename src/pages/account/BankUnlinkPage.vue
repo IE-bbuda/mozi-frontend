@@ -4,25 +4,24 @@ import { useRouter } from 'vue-router';
 import { getMainBank, deleteAccounts } from '@/api/accountApi';
 import { useBankStore } from '@/stores/bank';
 
-const bankList = ref([]);
-const selectedBank = ref(null);
-const showConfirm = ref(false);
 const router = useRouter();
-
 const bankStore = useBankStore();
 const banks = bankStore.banks;
 
-// 은행 코드로 로고 URL 찾기
+const bankList = ref([]);
+const selectedBanks = ref(new Set()); // ✅ 다중 선택용
+const showConfirm = ref(false);
+
+// 은행 로고 URL
 const getBankLogoUrl = (bankCode) => {
   const bank = banks.find((b) => b.code === bankCode);
   return bank?.logo || '/images/financial/default.png';
 };
 
-// 연동된 은행 목록 API 호출 후, Pinia 은행 정보와 매칭하여 객체 배열로 변환
+// 초기 데이터 로딩
 const loadBankList = async () => {
   try {
     const res = await getMainBank();
-    // res.bankList가 은행 코드 배열이라고 가정
     bankList.value = res.bankList.map(
       (code) =>
         banks.find((b) => b.code === code) || {
@@ -31,94 +30,100 @@ const loadBankList = async () => {
           logo: '/images/financial/default.png',
         }
     );
-  } catch (error) {
-    console.error('은행 목록 불러오기 실패:', error);
+  } catch (err) {
+    console.error('은행 목록 불러오기 실패:', err);
     bankList.value = [];
   }
 };
 
-// 삭제 확정 버튼 클릭
+// 은행 선택 토글
+const toggleBankSelection = (code) => {
+  if (selectedBanks.value.has(code)) {
+    selectedBanks.value.delete(code);
+  } else {
+    selectedBanks.value.add(code);
+  }
+  selectedBanks.value = new Set([...selectedBanks.value]); // 반응성 유지를 위해 복사
+};
+
+// 삭제 확정
 const confirmDelete = async () => {
-  if (!selectedBank.value) return;
   try {
-    await deleteAccounts([selectedBank.value]);
+    await deleteAccounts([...selectedBanks.value]);
     showConfirm.value = false;
-    selectedBank.value = null;
-    await loadBankList(); // 삭제 후 목록 갱신
+    selectedBanks.value.clear();
+    await loadBankList();
   } catch (error) {
     console.error('삭제 실패:', error);
   }
 };
 
-// 은행 선택 (토글)
-const selectBank = (code) => {
-  selectedBank.value = selectedBank.value === code ? null : code;
-};
-
-// 삭제 확인 모달 열기
-const openConfirm = () => {
-  if (selectedBank.value) showConfirm.value = true;
-};
-
 // 뒤로가기
-const goBack = () => {
-  router.back();
-};
+const goBack = () => router.back();
 
-// 초기 데이터 로딩
 onMounted(() => {
   loadBankList();
 });
 </script>
 
 <template>
-  <div class="page">
-    <!-- 상단 헤더 -->
+  <div class="container">
+    <!-- 헤더 -->
     <div class="header">
-      <span class=".back-btn" @click="goBack"
-        ><i class="fa-solid fa-angle-left"></i
-      ></span>
+      <span class="back-btn" @click="goBack">
+        <i class="fa-solid fa-angle-left"></i>
+      </span>
       <div style="font-size: 18px; font-weight: bold; color: #757575">
         은행 연동 해지
       </div>
     </div>
 
-    <!-- 은행 리스트 -->
-    <div class="bank-list">
+    <p>해지할 은행을 선택해주세요 (복수 선택 가능)</p>
+
+    <!-- 은행 목록 -->
+    <div class="bank-box">
       <div
         v-for="bank in bankList"
         :key="bank.code"
-        class="bank-item"
-        :class="{ selected: selectedBank === bank.code }"
-        @click="selectBank(bank.code)"
+        class="bank-row"
+        :class="{ selected: selectedBanks.has(bank.code) }"
+        @click="toggleBankSelection(bank.code)"
       >
         <img
           :src="getBankLogoUrl(bank.code)"
           alt="은행 로고"
-          class="bank-logo"
+          style="height: 32px; margin-right: 0.5rem"
         />
         <span class="bank-name">{{ bank.name }}</span>
         <span class="check-icon">
-          <i v-if="selectedBank === bank.code" class="fas fa-check-circle"></i>
-          <i v-else class="far fa-circle"></i>
+          <i
+            :class="[
+              'fa-regular',
+              selectedBanks.has(bank.code) ? 'fa-check-square' : 'fa-square',
+            ]"
+          ></i>
         </span>
       </div>
     </div>
 
     <!-- 삭제 버튼 -->
     <button
-      class="delete-button"
-      @click="openConfirm"
-      :disabled="!selectedBank"
+      class="delete-btn"
+      :disabled="selectedBanks.size === 0"
+      @click="showConfirm = true"
+      :style="{
+        backgroundColor: selectedBanks.size > 0 ? '#e34c4c' : '#d9d9d9',
+        cursor: selectedBanks.size > 0 ? 'pointer' : 'not-allowed',
+      }"
     >
       삭제하기
     </button>
 
-    <!-- 삭제 확인 모달 -->
+    <!-- 삭제 모달 -->
     <div class="modal-overlay" v-if="showConfirm">
       <div class="my-modal">
-        <p class="modal-title">해당 은행을 연동 해지하시겠습니까?</p>
-        <p class="modal-desc">관련 정보도 같이 삭제됩니다</p>
+        <p class="modal-title">선택한 은행을 연동 해지하시겠습니까?</p>
+        <p class="modal-desc">관련 정보도 함께 삭제됩니다.</p>
         <div class="modal-actions">
           <button class="cancel" @click="showConfirm = false">취소</button>
           <button class="confirm" @click="confirmDelete">삭제</button>
@@ -129,7 +134,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page {
+.container {
   padding: 16px;
 }
 .header {
@@ -140,52 +145,49 @@ onMounted(() => {
 .back-btn {
   font-size: 24px;
   cursor: pointer;
-  user-select: none;
 }
-.bank-list {
-  margin: 20px 0;
-}
-.bank-item {
-  padding: 12px;
-  border: 1px solid #ccc;
+.bank-box {
+  border: 1px solid #ddd;
   border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
+  padding: 8px;
+  margin-top: 12px;
+}
+.bank-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
 }
-.bank-item.selected {
-  border-color: teal;
-  background-color: #e6f0f0;
+.bank-row:last-child {
+  border-bottom: none;
 }
-.bank-logo {
-  height: 32px;
-  margin-right: 0.5rem;
+.bank-row.selected {
+  background-color: #e6f0f0;
 }
 .bank-name {
   flex: 1;
+  margin-left: 12px;
   font-weight: bold;
 }
-.check-icon i {
+.check-icon {
   font-size: 20px;
   color: teal;
 }
-.delete-button {
-  background-color: #3d6c6c;
-  color: white;
-  padding: 12px;
+.delete-btn {
+  display: block;
+  width: 90%;
+  margin: 100px 0 0 20px;
+  padding: 10px 0;
+  border-radius: 4px;
   border: none;
-  border-radius: 8px;
-  width: 100%;
+  font-size: 16px;
   font-weight: bold;
-  cursor: pointer;
+  color: white;
   transition: background-color 0.3s ease;
-}
-.delete-button:disabled {
-  background-color: #a0a0a0;
-  cursor: not-allowed;
+  box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4);
 }
 .modal-overlay {
   position: fixed;

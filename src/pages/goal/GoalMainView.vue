@@ -176,7 +176,7 @@ window.addEventListener('focus', loadGoals);
 <style scoped>
 .goal-main-container {
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #f5f5f7;
   min-height: 100vh;
 }
 
@@ -214,7 +214,7 @@ window.addEventListener('focus', loadGoals);
 
 .loading-spinner {
   font-size: 16px;
-  color: #666;
+  color: #6b7684;
 }
 
 .error-message {
@@ -224,7 +224,7 @@ window.addEventListener('focus', loadGoals);
 
 .retry-button {
   padding: 10px 20px;
-  background-color: #4fa2a0;
+  background-color: #2f9b78;
   color: white;
   border: none;
   border-radius: 6px;
@@ -233,17 +233,17 @@ window.addEventListener('focus', loadGoals);
 }
 
 .retry-button:hover {
-  background-color: #428b92;
+  background-color: #237a5f;
 }
 
 .banner-section {
-  background: linear-gradient(135deg, #4fa2a0 0%, #9cd5cb 100%);
+  background: linear-gradient(135deg, #2f9b78 0%, #d2f5e9 100%);
   padding: 20px;
   border-radius: 16px;
   margin-bottom: 30px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(79, 162, 160, 0.3);
+  box-shadow: 0 4px 12px rgba(47, 155, 120, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -275,7 +275,7 @@ window.addEventListener('focus', loadGoals);
 
 .banner-section:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 162, 160, 0.4);
+  box-shadow: 0 6px 20px rgba(47, 155, 120, 0.4);
 }
 
 .banner-content {
@@ -332,7 +332,7 @@ window.addEventListener('focus', loadGoals);
 .empty-state {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: #6b7684;
 }
 
 .empty-icon {

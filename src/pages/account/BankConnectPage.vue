@@ -1,19 +1,16 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBankStore } from '@/stores/bank';
 import BankLoginModal from '@/pages/account/BankLoginModal.vue';
-import { watch } from 'vue';
-console.log('진입');
+import { getConnectedBanks } from '@/api/accountApi'; // 실제 API 경로 맞게 수정
+
 const router = useRouter();
 const bankStore = useBankStore();
 
 const selectedBankCode = ref('');
 const showModal = ref(false);
 const modalBank = ref(null);
-watch(showModal, (newVal) => {
-  console.log('showModal 값 변경:', newVal);
-});
 
 const banks = bankStore.banks;
 
@@ -24,15 +21,13 @@ function selectBank(code) {
 }
 
 function handleConnect(bank) {
-  console.log('handleConnect 호출, bank:', bank);
+  if (bank.connected) return; // 이미 연결된 은행은 무시
   modalBank.value = bank;
   showModal.value = true;
 }
 
 function handleAgree() {
-  console.log('버튼 클릭');
   if (hasConnectedBank.value) {
-    console.log('넘어가기');
     router.push({ name: 'mainPage', query: { refresh: 'true' } });
   } else {
     alert('최소 하나 이상의 은행을 연동해주세요.');
@@ -42,6 +37,18 @@ function handleAgree() {
 function goBack() {
   router.back();
 }
+
+// 최초 mount 시 서버로부터 연동 은행 코드 받아오기
+onMounted(async () => {
+  try {
+    const response = await getConnectedBanks();
+    const connectedCodes = response.bankCodeList;
+    console.log(connectedCodes); // ex) ['0004', '0011']
+    bankStore.initializeConnectedBanks(connectedCodes);
+  } catch (e) {
+    console.error('연결된 은행 조회 실패:', e);
+  }
+});
 </script>
 
 <template>
@@ -73,11 +80,12 @@ function goBack() {
           <button
             class="badge-link"
             @click.stop="handleConnect(bank)"
-            :style="
-              bank.connected
-                ? 'background-color: #d9d9d9; color: white;'
-                : 'background-color: #776e6e; color: white;'
-            "
+            :disabled="bank.connected"
+            :style="{
+              backgroundColor: bank.connected ? '#d9d9d9' : '#776e6e',
+              color: 'white',
+              cursor: bank.connected ? 'default' : 'pointer',
+            }"
           >
             {{ bank.connected ? '완료' : '연동' }}
           </button>
@@ -105,14 +113,11 @@ function goBack() {
 </template>
 
 <style scoped>
-/* 기존 스타일 유지 + 선택 시 강조 */
 .wrapper {
   display: flex;
   justify-content: center;
   min-height: 700px;
-
   background-color: #f8f8f8;
-  /* padding-bottom: 20px; */
 }
 .content {
   width: 300px;
@@ -175,24 +180,24 @@ function goBack() {
   object-fit: contain;
 }
 .badge-link {
-  background-color: #776e6e;
-  color: white;
   padding: 2px 6px;
   width: 40px;
   border-radius: 5px;
   font-size: 8px;
   font-weight: 500;
-  border: 0 solid white;
+  border: none;
   white-space: nowrap;
   box-shadow: 0px 4px 5px rgba(0, 0, 0, 0.4);
   transition: box-shadow 0.2s;
 }
 .badge-link:active {
-  transform: scale(0.95); /* 살짝 눌리는 효과 */
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2); /* 그림자 약하게 */
-  background-color: #5a5353; /* 약간 어두운 배경으로 변경 */
+  transform: scale(0.95);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
 }
-
+.badge-link:disabled {
+  box-shadow: none;
+  transform: none;
+}
 .agree-btn {
   display: block;
   width: 100%;

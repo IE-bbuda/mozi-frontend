@@ -146,7 +146,17 @@
           <div
             v-for="account in accountList"
             :key="account.accountId"
-            class="account-item"
+            :class="[
+              'account-item',
+              {
+                selected: form.selectedAccountNumbers.includes(
+                  account.accountNumber
+                ),
+                'linked-to-other':
+                  accountGoalInfo[account.accountNumber] &&
+                  !form.selectedAccountNumbers.includes(account.accountNumber),
+              },
+            ]"
           >
             <label class="checkbox-label">
               <input
@@ -154,6 +164,10 @@
                 :value="account.accountNumber"
                 v-model="form.selectedAccountNumbers"
                 @change="updateCurrentAmount"
+                :disabled="
+                  accountGoalInfo[account.accountNumber] &&
+                  !form.selectedAccountNumbers.includes(account.accountNumber)
+                "
               />
               <span class="checkmark"></span>
               <div class="account-info">
@@ -166,8 +180,25 @@
                 <span class="balance">{{
                   formatAmount(account.balance || 0)
                 }}</span>
+                <!-- 다른 목표에 연결된 계좌 표시 -->
+                <div
+                  v-if="accountGoalInfo[account.accountNumber]"
+                  class="linked-goal-info"
+                >
+                  <i class="fas fa-link"></i>
+                  <span
+                    >"{{ accountGoalInfo[account.accountNumber].goalName }}"에
+                    연결됨</span
+                  >
+                </div>
               </div>
             </label>
+            <div
+              v-if="form.selectedAccountNumbers.includes(account.accountNumber)"
+              class="selected-indicator"
+            >
+              <i class="fas fa-check-circle"></i>
+            </div>
           </div>
         </div>
         <div
@@ -228,6 +259,7 @@ import { getAccountList, getAccountsByGoal } from '@/api/accountApi';
 // 계좌 목록 상태
 const accountList = ref([]);
 const loading = ref(false);
+const accountGoalInfo = ref({}); // 계좌별 목표 연결 정보
 
 // 키워드 목록 - goalApi의 getKeywordLabel 메서드와 매칭
 const keywords = [
@@ -263,12 +295,51 @@ const updateCurrentAmount = () => {
   }
 };
 
+// 계좌별 연결된 목표 정보 조회
+const loadAccountGoalInfo = async () => {
+  try {
+    // 모든 목표 조회
+    const goalsResponse = await goalApi.getGoals();
+    const goals = goalsResponse || [];
+
+    const goalInfo = {};
+
+    // 각 목표별로 연결된 계좌 조회
+    for (const goal of goals) {
+      try {
+        const linkedResponse = await getAccountsByGoal(goal.goalId);
+        const linkedAccounts = linkedResponse.accountList || [];
+
+        // 각 계좌에 목표 정보 매핑
+        linkedAccounts.forEach((account) => {
+          if (goal.goalId !== props.goalData?.id) {
+            // 현재 수정 중인 목표 제외
+            goalInfo[account.accountNumber] = {
+              goalId: goal.goalId,
+              goalName: goal.goalName,
+            };
+          }
+        });
+      } catch (error) {
+        console.error(`목표 ${goal.goalId}의 계좌 조회 실패:`, error);
+      }
+    }
+
+    accountGoalInfo.value = goalInfo;
+  } catch (error) {
+    console.error('계좌-목표 연결 정보 조회 실패:', error);
+  }
+};
+
 // 계좌 목록 로드 함수
 const loadAccounts = async () => {
   loading.value = true;
   try {
     const response = await getAccountList();
     accountList.value = response.accountList || [];
+
+    // 계좌별 목표 연결 정보 로드
+    await loadAccountGoalInfo();
 
     // 수정 모드이고 goalId가 있으면 연결된 계좌 정보 가져오기
     if (props.isEdit && props.goalData?.id) {
@@ -291,6 +362,14 @@ const loadAccounts = async () => {
   }
 };
 
+// 날짜 포맷 변환 함수 (LocalDateTime -> yyyy-MM-dd)
+const formatDateForInput = (dateString) => {
+  if (!dateString) return '';
+
+  // "2024-12-31 23:59:59" 또는 "2024-12-31T23:59:59" 형식을 "2024-12-31"로 변환
+  return dateString.split(' ')[0].split('T')[0];
+};
+
 // 폼 초기화 (수정 모드일 때 또는 프리셋 데이터가 있을 때)
 const initializeForm = () => {
   // 프리셋 데이터가 있는 경우 (1억 모으기 등)
@@ -306,7 +385,8 @@ const initializeForm = () => {
     form.goalName = props.goalData.name || '';
     form.targetAmount = props.goalData.targetAmount || '';
     form.currentAmount = props.goalData.currentAmount || 0;
-    form.targetDate = props.goalData.targetDate || '';
+    // 날짜 포맷 변환 적용
+    form.targetDate = formatDateForInput(props.goalData.targetDate) || '';
     form.keyword = props.goalData.keyword || '';
     form.memo = props.goalData.memo || '';
   }
@@ -400,12 +480,10 @@ onMounted(() => {
 });
 </script>
 
-<!-- GoalForm.vue 스타일 부분만 수정 - 1억 모으기 관련 색상을 로고 색상으로 변경 -->
-
 <style scoped>
 .goal-form-container {
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #f5f5f7;
   min-height: 100vh;
 }
 
@@ -424,7 +502,7 @@ onMounted(() => {
 }
 
 .billion-icon {
-  color: #4fa2a0;
+  color: #2f9b78;
   font-size: 20px;
   animation: sparkle 2s ease-in-out infinite alternate;
 }
@@ -441,8 +519,8 @@ onMounted(() => {
 }
 
 .preset-notice {
-  background: linear-gradient(135deg, #f0fffe 0%, #ffffff 100%);
-  border: 1px solid #4fa2a0;
+  background: #d2f5e9;
+  border: 1px solid #2f9b78;
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 20px;
@@ -452,13 +530,13 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #428b92;
+  color: #2f9b78;
   font-size: 14px;
   font-weight: 500;
 }
 
 .notice-content i {
-  color: #4fa2a0;
+  color: #2f9b78;
 }
 
 .goal-form {
@@ -493,13 +571,13 @@ onMounted(() => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4fa2a0;
+  border-color: #2f9b78;
 }
 
 .preset-input {
-  background-color: #f0fffe !important;
-  border-color: #4fa2a0 !important;
-  color: #428b92 !important;
+  background-color: #d2f5e9 !important;
+  border-color: #2f9b78 !important;
+  color: #2f9b78 !important;
 }
 
 .preset-info {
@@ -508,11 +586,11 @@ onMounted(() => {
   gap: 6px;
   margin-top: 6px;
   font-size: 12px;
-  color: #428b92;
+  color: #2f9b78;
 }
 
 .preset-info i {
-  color: #4fa2a0;
+  color: #2f9b78;
 }
 
 .amount-input {
@@ -546,19 +624,19 @@ onMounted(() => {
 }
 
 .keyword-btn:hover {
-  border-color: #4fa2a0;
-  color: #4fa2a0;
+  border-color: #2f9b78;
+  color: #2f9b78;
 }
 
 .keyword-btn.active {
-  background: #4fa2a0;
-  border-color: #4fa2a0;
+  background: #2f9b78;
+  border-color: #2f9b78;
   color: white;
 }
 
 .keyword-btn.preset {
-  background: linear-gradient(135deg, #4fa2a0, #9cd5cb);
-  border-color: #4fa2a0;
+  background: linear-gradient(135deg, #2f9b78, #d2f5e9);
+  border-color: #2f9b78;
   color: #ffffff;
   font-weight: 600;
 }
@@ -580,9 +658,9 @@ onMounted(() => {
 .no-accounts {
   padding: 20px;
   text-align: center;
-  color: #666;
+  color: #6b7684;
   font-size: 14px;
-  background-color: #f8f9fa;
+  background-color: #f2f4f6;
   border-radius: 8px;
 }
 
@@ -591,11 +669,19 @@ onMounted(() => {
   border-radius: 8px;
   padding: 12px;
   transition: all 0.2s ease;
+  background-color: white;
+  position: relative;
 }
 
 .account-item:hover {
-  border-color: #4fa2a0;
-  background-color: #f0fffe;
+  border-color: #2f9b78;
+  background-color: #d2f5e9;
+}
+
+.account-item.selected {
+  border-color: #2f9b78;
+  background-color: #d2f5e9;
+  box-shadow: 0 2px 8px rgba(47, 155, 120, 0.2);
 }
 
 .checkbox-label {
@@ -610,6 +696,7 @@ onMounted(() => {
   height: 18px;
   margin: 0;
   cursor: pointer;
+  accent-color: #2f9b78;
 }
 
 .account-info {
@@ -631,8 +718,52 @@ onMounted(() => {
 
 .balance {
   font-size: 13px;
-  color: #4fa2a0;
+  color: #2f9b78;
   font-weight: 500;
+}
+
+.account-item.linked-to-other {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  opacity: 0.7;
+}
+
+.account-item.linked-to-other .checkbox-label {
+  cursor: not-allowed;
+}
+
+.account-item.linked-to-other input[type='checkbox'] {
+  cursor: not-allowed;
+}
+
+.linked-goal-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.linked-goal-info i {
+  color: #6c757d;
+  font-size: 10px;
+}
+
+@keyframes checkAnimation {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .selected-summary {
@@ -641,14 +772,14 @@ onMounted(() => {
   gap: 6px;
   margin-top: 8px;
   padding: 8px 12px;
-  background-color: #f0fffe;
+  background-color: #d2f5e9;
   border-radius: 6px;
   font-size: 13px;
-  color: #428b92;
+  color: #2f9b78;
 }
 
 .selected-summary i {
-  color: #4fa2a0;
+  color: #2f9b78;
 }
 
 .form-actions {
@@ -670,8 +801,8 @@ onMounted(() => {
 }
 
 .cancel-btn {
-  background: #f8f9fa;
-  color: #666;
+  background: #f2f4f6;
+  color: #6b7684;
 }
 
 .cancel-btn:hover {
@@ -679,7 +810,7 @@ onMounted(() => {
 }
 
 .submit-btn {
-  background: #666;
+  background: #6b7684;
   color: white;
 }
 
@@ -693,15 +824,15 @@ onMounted(() => {
 }
 
 .billion-submit {
-  background: linear-gradient(135deg, #4fa2a0, #9cd5cb) !important;
+  background: linear-gradient(135deg, #2f9b78, #d2f5e9) !important;
   color: #ffffff !important;
   font-weight: 600 !important;
 }
 
 .billion-submit:hover {
-  background: linear-gradient(135deg, #428b92, #4fa2a0) !important;
+  background: linear-gradient(135deg, #237a5f, #2f9b78) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(79, 162, 160, 0.3);
+  box-shadow: 0 4px 12px rgba(47, 155, 120, 0.3);
 }
 
 /* 반응형 디자인 */

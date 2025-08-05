@@ -21,10 +21,12 @@ const verificationCode = ref('');
 const sentCode = ref(false);
 const isEmailVerified = ref(false);
 
+function goBack() {
+  router.back();
+}
+
 function validateUserId() {
-  errors.userId = userId.value.trim()
-    ? ''
-    : '가입 시 등록한 아이디를 입력해주세요';
+  errors.userId = userId.value.trim() ? '' : '가입 시 등록한 아이디를 입력해주세요';
 }
 
 function validateEmail() {
@@ -50,16 +52,11 @@ async function sendVerificationCode() {
       sentCode.value = true;
       alert('인증 코드가 이메일로 발송되었습니다');
     } else {
-      alert(
-        response.message || '인증 코드 발송에 실패했습니다. 다시 시도해주세요.'
-      );
+      alert(response.message || '인증 코드 발송에 실패했습니다. 다시 시도해주세요.');
     }
   } catch (error) {
     console.error('이메일 발송 실패:', error);
-    alert(
-      error.response?.data?.message ||
-        '인증 코드 발송에 실패했습니다. 다시 시도해주세요.'
-    );
+    alert(error.response?.data?.message || '인증 코드 발송에 실패했습니다. 다시 시도해주세요.');
   }
 }
 
@@ -82,25 +79,17 @@ async function verifyCode() {
       alert('이메일 인증이 완료되었습니다.');
     } else {
       isEmailVerified.value = false;
-      errors.verificationCode =
-        response.message || '인증 코드가 일치하지 않습니다.';
+      errors.verificationCode = response.message || '인증 코드가 일치하지 않습니다.';
     }
   } catch (error) {
     console.error('이메일 인증 실패:', error);
     isEmailVerified.value = false;
-    errors.verificationCode =
-      error.response?.data?.message || '인증 코드가 일치하지 않습니다.';
+    errors.verificationCode = error.response?.data?.message || '인증 코드가 일치하지 않습니다.';
   }
 }
 
 const canSubmit = computed(() => {
-  return (
-    userId.value.trim() &&
-    email.value.trim() &&
-    !errors.userId &&
-    !errors.email &&
-    isEmailVerified.value
-  );
+  return userId.value.trim() && email.value.trim() && !errors.userId && !errors.email && isEmailVerified.value;
 });
 
 async function handleSubmit() {
@@ -127,14 +116,11 @@ async function handleSubmit() {
         query: { token: token },
       });
     } else {
-      submitError.value =
-        response.message || '아이디 또는 이메일이 일치하지 않습니다';
+      submitError.value = response.message || '아이디 또는 이메일이 일치하지 않습니다';
     }
   } catch (error) {
     console.error('계정 확인 실패:', error);
-    submitError.value =
-      error.response?.data?.message ||
-      '요청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    submitError.value = error.response?.data?.message || '요청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.';
   } finally {
     loading.value = false;
   }
@@ -143,7 +129,7 @@ async function handleSubmit() {
 
 <template>
   <div class="header">
-    <font-awesome-icon icon="fa-solid fa-chevron-left" class="backIcon" />
+    <font-awesome-icon icon="fa-solid fa-chevron-left" class="backIcon" @click="goBack" />
     <h1 class="logo">MoZi</h1>
   </div>
   <div class="title">비밀번호 찾기</div>
@@ -153,13 +139,7 @@ async function handleSubmit() {
       <section class="writeID section-field">
         <label>
           아이디
-          <input
-            name="userId"
-            type="text"
-            v-model="userId"
-            placeholder="아이디를 입력하세요"
-            @blur="validateUserId"
-          />
+          <input name="userId" type="text" v-model="userId" placeholder="아이디를 입력하세요" @blur="validateUserId" />
           <span v-if="errors.userId" class="error">{{ errors.userId }}</span>
         </label>
       </section>
@@ -168,17 +148,9 @@ async function handleSubmit() {
         <section class="writeEmail section-field">
           <label>
             이메일
-            <input
-              name="email"
-              type="email"
-              v-model="email"
-              placeholder="이메일을 입력하세요"
-              @blur="validateEmail"
-            />
+            <input name="email" type="email" v-model="email" placeholder="이메일을 입력하세요" @blur="validateEmail" />
           </label>
-          <span :class="['error-message', { visible: errors.email }]">{{
-            errors.email || ''
-          }}</span>
+          <span :class="['error-message', { visible: errors.email }]">{{ errors.email || '' }}</span>
           <button type="button" @click="sendVerificationCode">인증</button>
         </section>
 
@@ -189,19 +161,14 @@ async function handleSubmit() {
               name="verificationCode"
               type="text"
               v-model="verificationCode"
-              placeholder="인증 코드를 입력하세요"
-            />
-            <span v-if="errors.verificationCode" class="error">{{
-              errors.verificationCode
-            }}</span>
+              placeholder="인증 코드를 입력하세요" />
+            <span v-if="errors.verificationCode" class="error">{{ errors.verificationCode }}</span>
           </label>
           <button type="button" @click="verifyCode">확인</button>
         </section>
 
         <!-- 인증 완료 메시지 -->
-        <div v-if="isEmailVerified" class="verification-success">
-          ✅ 이메일 인증이 완료되었습니다.
-        </div>
+        <div v-if="isEmailVerified" class="verification-success">✅ 이메일 인증이 완료되었습니다.</div>
       </div>
 
       <button
@@ -210,8 +177,7 @@ async function handleSubmit() {
         :class="{
           'active-btn': canSubmit && !loading,
           'inactive-btn': !canSubmit || loading,
-        }"
-      >
+        }">
         {{ loading ? '처리중...' : '확인' }}
       </button>
 

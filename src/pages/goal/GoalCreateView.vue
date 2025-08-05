@@ -104,10 +104,11 @@ const handleCancel = () => {
   justify-content: center;
   align-items: center;
   min-height: 50vh;
+  background-color: #f5f5f7;
 }
 
 .loading-spinner {
   font-size: 16px;
-  color: #666;
+  color: #6b7684;
 }
 </style>

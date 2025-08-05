@@ -18,9 +18,11 @@ export const authAPI = {
   verifySignupEmailCode: (data) =>
     api.post('/users/signup/verify-email-code', data),
 
-  // 로그인 ID 찾기
+  // 아이디 찾기
   findLoginId: (username, email) =>
-    api.get(`/users/find-id?username=${username}&email=${email}`),
+    api.get('/users/find-id', {
+      params: { username, email },
+    }),
 
   // 비밀번호 재설정용 이메일 인증
   sendPasswordResetCode: (email) =>

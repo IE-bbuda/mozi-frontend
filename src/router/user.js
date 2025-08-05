@@ -5,12 +5,12 @@ export default [
     component: () => import('../pages/user/MyPage.vue'),
     meta: { isHeader: true, isFooter: true },
   },
-  // {
-  //   path: '/user/personal',
-  //   name: 'personal',
-  //   component: () => import('../pages/user/PersonalInfo.vue'),
-  //   meta: { isHeader: true, isFooter: true },
-  // },
+  {
+    path: '/user/personal',
+    name: 'personal',
+    component: () => import('../pages/user/PersonalInfo.vue'),
+    meta: { isHeader: true, isFooter: true },
+  },
   {
     path: '/multi-step',
     name: 'MultiStep',

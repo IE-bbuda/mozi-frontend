@@ -70,7 +70,10 @@ const loadGoalData = async () => {
       name: goal.goalName,
       targetAmount: goal.targetAmount,
       currentAmount: currentAmount, // 계좌 잔액 합계로 설정
-      targetDate: goal.goalDate,
+      // 날짜 포맷 변환: "yyyy-MM-dd HH:mm:ss" -> "yyyy-MM-dd"
+      targetDate: goal.goalDate
+        ? goal.goalDate.split(' ')[0].split('T')[0]
+        : '',
       keyword: goal.keyword,
       memo: goal.memo,
       //수정: accountNumber 배열로 전달
@@ -159,11 +162,12 @@ onMounted(() => {
   align-items: center;
   min-height: 50vh;
   gap: 16px;
+  background-color: #f5f5f7;
 }
 
 .loading-spinner {
   font-size: 16px;
-  color: #666;
+  color: #6b7684;
 }
 
 .error-message {
@@ -174,7 +178,7 @@ onMounted(() => {
 
 .retry-button {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #2f9b78;
   color: white;
   border: none;
   border-radius: 6px;
@@ -183,6 +187,6 @@ onMounted(() => {
 }
 
 .retry-button:hover {
-  background-color: #0056b3;
+  background-color: #237a5f;
 }
 </style>

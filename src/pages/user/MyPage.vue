@@ -4,33 +4,39 @@ import { ref, onMounted, watch } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCircleUser } from '@fortawesome/free-regular-svg-icons';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useRoute, useRouter } from 'vue-router';
+import { computed } from 'vue';
 
 const route = useRoute();
 const router = useRouter();
 const personalForm = ref(null);
+const canSubmit = computed(() => passwordInput.value.trim() !== '');
 
-library.add(faCircleUser);
+library.add(faCircleUser, faXmark);
 
-// api로 회원정보 가져오기
+// 사용자 정보
 const userInfo = ref({
   name: '김케비',
   phone: '010-0000-0000',
   email: 'IEQnek@naver.com',
 });
 
-//모달 관련
+// 모달 상태
 const showPasswordModal = ref(false);
 const passwordInput = ref('');
 const passwordError = ref('');
-const isEditing = ref(false);
 
-// 수정 버튼 클릭 시 모달 오픈
+// 수정 버튼 → 모달 열기
 function openPasswordModal() {
   passwordInput.value = '';
   passwordError.value = '';
   showPasswordModal.value = true;
-  console.log('모달 상태:', showPasswordModal.value); // 상태 확인
+}
+
+// 모달 닫기
+function closeModal() {
+  showPasswordModal.value = false;
 }
 
 // 비밀번호 확인
@@ -39,33 +45,39 @@ async function verifyPassword() {
     passwordError.value = '비밀번호를 입력해주세요.';
     return;
   }
+
   try {
     const res = await axios.post(
       '/api/verify-password',
-      { password: passwordInput.value.trim() },
-      { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
+      { password: passwordInput.value },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      }
     );
-    showPasswordModal.value = false;
-    await router.push({ name: 'EditInfo' });
+    if (res.data.success) {
+      router.push({ name: 'EditInfo' });
+    } else {
+      passwordError.value = '비밀번호가 일치하지 않습니다.';
+    }
   } catch (e) {
-    passwordError.value = '비밀번호가 일치하지 않아요.';
+    passwordError.value = '비밀번호가 확인 중 오류가 발생했습니다.';
   }
 }
 
-// 퍼스널 정보 입력
-const personalInfo = ref('');
-
+// 퍼스널 정보
 const savePersonalInfo = () => {
   router.push('/personal');
 };
 
-// 마운트 시 localstorage에서 값 불러오기
+// 마운트 시 localStorage 불러오기
 onMounted(() => {
   const saved = localStorage.getItem('personalForm');
   if (saved) personalForm.value = JSON.parse(saved);
 });
 
-// query.updated 쿼리가 변경됐을 때 다시 갱신
+// 쿼리 파라미터 갱신 감지
 watch(
   () => route.query.updated,
   (val) => {
@@ -80,83 +92,159 @@ watch(
 
 <template>
   <div class="mypage-container">
-    <!-- 기본 정보 카드 -->
-    <div class="info-card">
-      <div class="info-header">
-        <h3>기본 정보</h3>
-        <button class="edit-btn" @click="openPasswordModal">수정</button>
-      </div>
-      <div class="user-info">
-        <div class="avatar">
-          <font-awesome-icon :icon="['far', 'circle-user']" size="2x" />
+    <!-- 비밀번호 확인 모달 -->
+    <div v-if="showPasswordModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>비밀번호 확인</h3>
+          <font-awesome-icon :icon="['fas', 'xmark']" class="close-icon" @click="closeModal" />
         </div>
-      </div>
-
-      <div class="details">
-        <div class="row">
-          <span class="label">이름</span>
-          <span class="value">{{ userInfo.name }}</span>
-        </div>
-        <div class="row">
-          <span class="label">전화번호</span>
-          <span class="value">{{ userInfo.phone }}</span>
-        </div>
-        <div class="row">
-          <span class="label">이메일</span>
-          <span class="value">{{ userInfo.email }}</span>
+        <p class="desc">정보 수정을 위해 비밀번호를 입력해주세요</p>
+        <input v-model="passwordInput" type="password" placeholder="비밀번호 입력" class="pw-input" />
+        <div v-if="passwordError" class="error-msg">{{ passwordError }}</div>
+        <div class="btn-group">
+          <button @click="verifyPassword" :disabled="!canSubmit" :class="{ 'disabled-btn': !canSubmit }">확인</button>
         </div>
       </div>
     </div>
 
-    <!-- 비밀번호 입력 모달 -->
-    <teleport to="body">
-      <div v-if="showPasswordModal" class="modal-overlay">
-        <div class="modal">
-          <h3>비밀번호 확인</h3>
-          <input v-model="passwordInput" type="password" placeholder="비밀번호" />
-          <div v-if="passwordError" class="error">{{ passwordError }}</div>
-          <div class="modal-actions">
-            <button @click="verifyPassword">확인</button>
-            <button @click="showPasswordModal = false">취소</button>
+    <!-- 마이페이지 화면 -->
+    <div class="mypage-container">
+      <!-- 기본 정보 카드 -->
+      <div class="info-card">
+        <div class="info-header">
+          <h3>기본 정보</h3>
+          <button class="edit-btn" @click="openPasswordModal">수정</button>
+        </div>
+        <div class="user-info">
+          <div class="avatar">
+            <font-awesome-icon :icon="['far', 'circle-user']" size="2x" />
+          </div>
+        </div>
+
+        <div class="details">
+          <div class="row">
+            <span class="label">이름</span>
+            <span class="value">{{ userInfo.name }}</span>
+          </div>
+          <div class="row">
+            <span class="label">전화번호</span>
+            <span class="value">{{ userInfo.phone }}</span>
+          </div>
+          <div class="row">
+            <span class="label">이메일</span>
+            <span class="value">{{ userInfo.email }}</span>
           </div>
         </div>
       </div>
-    </teleport>
 
-    <!-- 퍼스널 정보 카드 -->
-    <div class="personal-card">
-      <template v-if="personalForm">
-        <h3>퍼스널 정보</h3>
-        <div class="grid">
-          <div class="item">
-            <span class="label">학력</span>
-            <span class="value">{{ personalForm.education }}</span>
+      <!-- 퍼스널 정보 카드 -->
+      <div class="personal-card">
+        <template v-if="personalForm">
+          <h3>퍼스널 정보</h3>
+          <div class="grid">
+            <div class="item">
+              <span class="label">학력</span>
+              <span class="value">{{ personalForm.education }}</span>
+            </div>
+            <div class="item">
+              <span class="label">취업상태</span>
+              <span class="value">{{ personalForm.employment }}</span>
+            </div>
+            <div class="item">
+              <span class="label">전공</span>
+              <span class="value">{{ personalForm.major }}</span>
+            </div>
+            <div class="item">
+              <span class="label">특화분야</span>
+              <span class="value">{{ personalForm.specialty }}</span>
+            </div>
           </div>
-          <div class="item">
-            <span class="label">취업상태</span>
-            <span class="value">{{ personalForm.employment }}</span>
-          </div>
-          <div class="item">
-            <span class="label">전공</span>
-            <span class="value">{{ personalForm.major }}</span>
-          </div>
-          <div class="item">
-            <span class="label">특화분야</span>
-            <span class="value">{{ personalForm.specialty }}</span>
-          </div>
-        </div>
-        <button class="edit-btn" @click="router.push('/user/personal')">퍼스널 정보 수정</button>
-      </template>
-      <template v-else>
-        <h3>퍼스널 정보</h3>
-        <p class="desc">설정하신 개인정보 및 관심사항을 기반으로<br />맞춤 정책을 제공합니다.</p>
-        <button class="save-btn" @click="router.push('/user/personal')">퍼스널 정보 입력</button>
-      </template>
+          <button class="edit-btn" @click="router.push('/user/personal')">퍼스널 정보 수정</button>
+        </template>
+        <template v-else>
+          <h3>퍼스널 정보</h3>
+          <p class="desc">설정하신 개인정보 및 관심사항을 기반으로<br />맞춤 정책을 제공합니다.</p>
+          <button class="save-btn" @click="router.push('/user/personal')">퍼스널 정보 입력</button>
+        </template>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 80px;
+  z-index: 1000;
+  padding-inline: 16px;
+  box-sizing: border-box;
+}
+
+.modal {
+  background: #fff;
+  padding: 90px 24px 24px;
+  border-radius: 10px;
+  width: 320px;
+  max-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 0;
+}
+.modal-header h3 {
+  font-size: 18px;
+  margin: 0;
+}
+.close-icon {
+  font-size: 18px;
+  cursor: pointer;
+  color: #999;
+}
+.desc {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #555;
+}
+.pw-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.error-msg {
+  color: red;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.btn-group {
+  margin-top: 40px;
+}
+.btn-group button {
+  width: 100%;
+  padding: 10px;
+  background-color: #36c18c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
 .mypage-container {
   display: flex;
   flex-direction: column;
@@ -178,7 +266,6 @@ watch(
   justify-content: space-between;
   align-items: center;
 }
-
 .edit-btn {
   padding: 6px 12px;
   font-size: 14px;
@@ -197,7 +284,6 @@ watch(
   border-radius: 8px;
   padding: 20px;
 }
-
 .personal-card h3 {
   margin-bottom: 16px;
   color: #36c18c;
@@ -209,7 +295,6 @@ watch(
   gap: 12px;
   margin-bottom: 16px;
 }
-
 .item {
   display: flex;
   align-items: center;
@@ -226,39 +311,5 @@ watch(
 .value {
   flex: 1;
   color: #333;
-}
-
-/* ✅ 모달 스타일 (scoped에서도 적용되도록 deep 사용) */
-:deep(.modal-overlay) {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 9998;
-}
-
-:deep(.modal) {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 24px;
-  border-radius: 8px;
-  z-index: 9999;
-  width: 300px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-:deep(.modal-actions) {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-:deep(.modal-actions button) {
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
 }
 </style>

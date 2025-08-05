@@ -5,20 +5,40 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const form = ref({ name: '', phone: '', email: '' });
+const loading = ref(false);
+const error = ref('');
 
+// 사용자 정보 불러오기
 onMounted(async () => {
-  // 기본 정보 호출 (API 또는 local storage)
-  const res = await axios.get('/api/me', {
-    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-  });
-  form.value = res.data;
+  try {
+    const res = await axios.get('/api/me', {
+      headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+    });
+    form.value = res.data;
+  } catch (err) {
+    error.value = '사용자 정보를 불러오는 데 실패했습니다.';
+  }
 });
 
+// 저장
 async function onSave() {
-  await axios.put('/api/me', form.value, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-  });
-  router.push({ name: 'myPage', query: { updated: 'true' } });
+  if (!form.value.name || !form.value.phone || !form.value.email) {
+    error.value = '모든 항목을 입력해주세요.';
+    return;
+  }
+
+  try {
+    loading.value = true;
+    await axios.put('/api/me', form.value, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+    });
+    alert('정보가 수정되었습니다.');
+    router.push({ name: 'myPage', query: { updated: 'true' } });
+  } catch (err) {
+    error.value = '정보 저장에 실패했습니다.';
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 
@@ -26,12 +46,15 @@ async function onSave() {
   <div class="container form-edit">
     <h2>기본 정보 수정</h2>
     <label>이름</label>
-    <input v-model="form.name" />
+    <input v-model="form.name" placeholder="이름 입력" />
     <label>전화번호</label>
-    <input v-model="form.phone" />
+    <input v-model="form.phone" placeholder="전화번호 입력" />
     <label>이메일</label>
-    <input v-model="form.email" />
-    <button @click="onSave">저장</button>
+    <input v-model="form.email" placeholder="이메일 입력" />
+
+    <div v-if="error" class="error-msg">{{ error }}</div>
+
+    <button :disabled="loading" @click="onSave">{{ loading ? '저장 중...' : '저장' }}</button>
   </div>
 </template>
 

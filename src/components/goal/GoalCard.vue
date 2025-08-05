@@ -175,19 +175,52 @@ const formatCurrency = (amount) => {
 }
 
 .goal-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(47, 155, 120, 0.3);
   transform: translateY(-2px);
+}
+
+/* hover 시 텍스트를 더 진한 검은색으로 */
+.goal-card:hover .goal-name,
+.goal-card:hover .current-amount,
+.goal-card:hover .target-amount,
+.goal-card:hover .divider {
+  color: #222; /* 검은색으로 변경 */
+  text-shadow: none; /* 그림자 제거 */
+}
+
+.goal-card:hover .status-tag.in-progress-default,
+.goal-card:hover .status-tag.completed-default {
+  background-color: rgba(0, 0, 0, 0.05); /* 연한 검은색 배경 */
+  color: #222; /* 검은색 텍스트 */
+  border-color: rgba(0, 0, 0, 0.1);
+  text-shadow: none;
+}
+
+.goal-card:hover .edit-btn,
+.goal-card:hover .delete-btn {
+  color: #222; /* 검은색으로 변경 */
+  text-shadow: none;
+}
+
+.goal-card:hover .edit-btn:hover,
+.goal-card:hover .delete-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* 연한 검은색 배경 */
 }
 
 /* 1억 모으기 특별 스타일 */
 .billion-goal {
-  background: linear-gradient(135deg, #f0fffe 0%, #ffffff 100%);
-  border: 2px solid #4fa2a0;
-  box-shadow: 0 4px 16px rgba(79, 162, 160, 0.2);
+  background: linear-gradient(135deg, #d2f5e9 0%, #ffffff 100%);
+  border: 2px solid #7bc4a4;
+  box-shadow: 0 4px 16px rgba(47, 155, 120, 0.2);
 }
 
 .billion-goal:hover {
-  box-shadow: 0 8px 24px rgba(79, 162, 160, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(210, 245, 233, 0.8) 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  box-shadow: 0 8px 24px rgba(123, 196, 164, 0.3);
   transform: translateY(-3px);
 }
 
@@ -198,7 +231,7 @@ const formatCurrency = (amount) => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #4fa2a0, #9cd5cb, #4fa2a0);
+  background: linear-gradient(90deg, #2f9b78, #d2f5e9, #2f9b78);
   border-radius: 12px 12px 0 0;
 }
 
@@ -222,6 +255,7 @@ const formatCurrency = (amount) => {
   color: #333;
   margin: 0;
   line-height: 1.2;
+  transition: color 0.2s ease;
 }
 
 .status-tag {
@@ -231,29 +265,30 @@ const formatCurrency = (amount) => {
   font-size: 11px;
   font-weight: 600;
   width: fit-content;
+  transition: all 0.2s ease;
 }
 
 /* 1억 모으기 카드 색상 있는 태그 */
 .status-tag.in-progress {
-  background-color: #428b92;
+  background-color: #2f9b78;
   color: #ffffff;
 }
 
 .status-tag.completed {
-  background-color: #4fa2a0;
+  background-color: #2f9b78;
   color: #ffffff;
 }
 
 /* 일반 카드 색상 없는 태그 */
 .status-tag.in-progress-default {
   background-color: transparent;
-  color: #666;
+  color: #6b7684;
   border: 1px solid #ddd;
 }
 
 .status-tag.completed-default {
   background-color: transparent;
-  color: #666;
+  color: #6b7684;
   border: 1px solid #ddd;
 }
 
@@ -270,13 +305,13 @@ const formatCurrency = (amount) => {
   padding: 6px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: #666;
+  transition: all 0.2s ease;
+  color: #6b7684;
   font-size: 14px;
 }
 
 .edit-btn:hover {
-  background-color: #f8f9fa;
+  background-color: #f2f4f6;
   color: #333;
 }
 
@@ -300,21 +335,22 @@ const formatCurrency = (amount) => {
 .current-amount {
   font-weight: 600;
   color: #333;
+  transition: color 0.2s ease;
 }
 
 .billion-goal .current-amount {
-  color: #428b92;
+  color: #2f9b78;
 }
 
 .divider {
   color: #999;
+  transition: color 0.2s ease;
 }
 
 .target-amount {
   color: #666;
+  transition: color 0.2s ease;
 }
-
-/* 퍼센트 텍스트 스타일 제거 */
 
 /* 모달 스타일 */
 .modal-overlay {
@@ -385,8 +421,8 @@ const formatCurrency = (amount) => {
 }
 
 .cancel-btn {
-  background-color: #f8f9fa;
-  color: #666;
+  background-color: #f2f4f6;
+  color: #6b7684;
 }
 
 .cancel-btn:hover {
@@ -401,6 +437,4 @@ const formatCurrency = (amount) => {
 .confirm-btn:hover {
   background-color: #c82333;
 }
-
-/* 카드 높이 제거 - 불필요한 반응형 코드 삭제 */
 </style>

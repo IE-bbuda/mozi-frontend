@@ -105,3 +105,8 @@ export const updateAccountsByGoal = async (data) => {
     throw error;
   }
 };
+
+export async function getConnectedBanks() {
+  const res = await api.get('/account/connected-banks');
+  return res;
+}

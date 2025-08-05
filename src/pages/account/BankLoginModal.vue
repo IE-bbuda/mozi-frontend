@@ -13,10 +13,14 @@
         class="input"
       />
       <p v-if="error" class="error">{{ error }}</p>
+      <div class="badge-container">
+        <span class="badge" @click="goHomPage">{{ bank.name }} 홈페이지</span>
+      </div>
       <div class="modal-actions">
         <button @click="connect" class="connect-btn" :disabled="loading">
           {{ loading ? '연동 중...' : '연동' }}
         </button>
+
         <button @click="close" class="cancel-btn">취소</button>
       </div>
     </div>
@@ -39,6 +43,13 @@ const bankStore = useBankStore();
 const loading = ref(false);
 function close() {
   emit('close');
+}
+function goHomPage() {
+  if (props.bank.link) {
+    window.open(props.bank.link, '_blank'); // 새 창으로 열기
+  } else {
+    alert('홈페이지 링크가 존재하지 않습니다.');
+  }
 }
 async function connect() {
   if (!id.value || !password.value) {
@@ -105,7 +116,7 @@ async function connect() {
 .input {
   display: block;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 5px;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -138,5 +149,25 @@ async function connect() {
   margin: 10px 0;
   font-size: 14px;
   color: #4caf50;
+}
+.badge-container {
+  display: flex;
+  justify-content: flex-end; /* 또는 margin-left: auto 방식 */
+  margin-bottom: 16px;
+}
+.badge {
+  display: inline-block;
+  /* margin: 0px 0 30px 150px; */
+  padding: 4px 8px;
+  background-color: #e0f3ff;
+  color: #0077cc;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.badge:hover {
+  background-color: #d0eaff;
 }
 </style>

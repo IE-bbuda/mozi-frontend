@@ -61,7 +61,7 @@ const goBack = () => {
 <template>
   <div class="container">
     <div class="header">
-      <span class=".back-btn" @click="goBack"
+      <span class="back-btn" @click="goBack"
         ><i class="fa-solid fa-angle-left"></i
       ></span>
       <div style="font-size: 18px; font-weight: bold; color: #757575">

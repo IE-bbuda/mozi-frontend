@@ -6,4 +6,6 @@ export const profileAPI = {
 
   // 프로필 저장
   saveProfile: (profileData) => api.post('/profile', profileData),
+  // 프로필 수정
+  updateProfile: (profileData) => api.put('/profile', profileData),
 };
