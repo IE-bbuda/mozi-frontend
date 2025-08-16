@@ -311,16 +311,11 @@ watch(
   />
 
   <!-- 목표 리스트 -->
-  <div style="display: flex">
-    <p
-      style="margin: 10px 10px -30px 25px; color: #6b7684; font-weight: bolder"
-    >
-      나의 목표
-    </p>
+  <div class="section-header">
+    <p class="section-title">나의 목표</p>
     <i
-      class="fa-solid fa-angle-right fa-sm"
+      class="fa-solid fa-angle-right fa-sm section-arrow"
       @click="goToGoalPage"
-      style="color: #d9d9d9; cursor: pointer; margin: 23px 0 5px 0"
     ></i>
   </div>
 
@@ -345,18 +340,15 @@ watch(
   </div>
 
   <!-- 계좌 정보 -->
-  <div style="display: flex">
-    <p style="margin: 10px 10px 0px 25px; color: #6b7684; font-weight: bolder">
-      나의 자산
-    </p>
+  <div class="section-header">
+    <p class="section-title">나의 자산</p>
     <i
-      class="fa-solid fa-angle-right fa-sm"
+      class="fa-solid fa-angle-right fa-sm section-arrow"
       @click="goToTotalPage"
-      style="color: #d9d9d9; cursor: pointer; margin: 23px 0 5px 0"
     ></i>
   </div>
 
-  <div style="margin: 0px 20px; padding-top: 10px">
+  <div class="section-content">
     <div v-if="isUnlinked" class="card card-unlinked">
       <div class="card-text">연동시 더 많은 기능을 이용할 수 있어요!</div>
       <button class="card-btn" @click="goToAccountAuth">계좌 연동</button>
@@ -441,20 +433,15 @@ watch(
   </div>
 
   <!-- 마감임박 정책 -->
-  <div style="display: flex; margin-top: 12px">
-    <p
-      style="margin: 10px 10px -10px 25px; color: #6b7684; font-weight: bolder"
-    >
-      마감 임박 정책
-    </p>
+  <div class="section-header">
+    <p class="section-title">마감 임박 정책</p>
     <i
-      class="fa-solid fa-angle-right fa-sm"
+      class="fa-solid fa-angle-right fa-sm section-arrow"
       @click="goToPolicyPage"
-      style="color: #d9d9d9; cursor: pointer; margin: 23px 0 5px 0"
     ></i>
   </div>
   <!-- 정책 카드뷰 -->
-  <div style="margin: 2px 20px">
+  <div class="section-content">
     <Swiper
       v-if="deadlinePolicies.length > 0"
       :slides-per-view="'auto'"
@@ -487,21 +474,16 @@ watch(
   </div>
 
   <!-- 금융 상품 -->
-  <div style="display: flex; margin-top: -16px">
-    <p
-      style="margin: 10px 10px -10px 25px; color: #6b7684; font-weight: bolder"
-    >
-      금융 상품
-    </p>
+  <div class="section-header">
+    <p class="section-title">금융 상품</p>
     <i
-      class="fa-solid fa-angle-right fa-sm"
+      class="fa-solid fa-angle-right fa-sm section-arrow"
       @click="goToFinancialPage"
-      style="color: #d9d9d9; cursor: pointer; margin: 23px 0 5px 0"
     ></i>
   </div>
 
   <!-- 예, 적금 우대 금리 상위 2개 상품 출력 -->
-  <div style="margin: 2px 20px">
+  <div class="section-content">
     <Swiper
       v-if="products.length > 0"
       :slides-per-view="'auto'"
@@ -519,7 +501,7 @@ watch(
           :deposit="item"
           :productType="item.type"
           sourceTab="main"
-          style="margin-bottom: 5px"
+          
         />
       </SwiperSlide>
     </Swiper>
@@ -527,6 +509,32 @@ watch(
 </template>
 
 <style scoped>
+/* 섹션 헤더 통일 스타일 */
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 20px 8px 20px;
+  gap: 8px;
+}
+
+.section-title {
+  color: #6b7684;
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0;
+}
+
+.section-arrow {
+  color: #d9d9d9;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* 섹션 콘텐츠 통일 스타일 */
+.section-content {
+  padding: 0 20px 8px 20px;
+}
+
 .card {
   width: 100%;
   height: 80px;
@@ -582,7 +590,8 @@ watch(
 }
 
 .goal-main-container {
-  padding: 12px 20px;
+  padding: 0 20px 0px 20px;
+  margin-bottom: 12px;
 }
 
 .goals-container {
@@ -596,7 +605,7 @@ watch(
 }
 .financial-swiper {
   width: 100%;
-  padding: 10px 0;
+
 }
 
 .financial-slide {
@@ -611,7 +620,7 @@ watch(
 
 .policy-swiper {
   width: 100%;
-  padding: 10px 0;
+ 
 }
 .policy-slide {
   width: 100%;

@@ -141,7 +141,7 @@ function isClosed(aplyYmd) {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 8px #0001;
-  padding: 16px 18px 12px 18px;
+  padding: 8px 16px 8px 16px;
   margin-bottom: 16px;
   width: 100%;
   position: relative;

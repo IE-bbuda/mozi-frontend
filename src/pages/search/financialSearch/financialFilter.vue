@@ -96,7 +96,7 @@ export default {
       ],
       bankOptions: [
         { label: 'KB국민', value: '0010927' },
-        { label: '신한', value: '0010020' },
+        { label: '신한', value: '0011625' },
         { label: '우리', value: '0010001' },
         { label: '하나', value: '0013909' },
         { label: 'SC제일', value: '0010002' },
@@ -107,9 +107,9 @@ export default {
         { label: '부산', value: '0010017' },
         { label: 'IM뱅크', value: '0010016' },
         { label: 'SH수협', value: '0014807' },
-        { label: '경남', value: '0010017' },
+        { label: '경남', value: '0010024' },
         { label: '광주', value: '0010019' },
-        { label: '전북', value: '0010019' },
+        { label: '전북', value: '0010022' },
         { label: '제주', value: '0010020' },
         { label: 'NH농협', value: '0013175' },
         { label: '신협', value: '0014807' }
@@ -138,6 +138,9 @@ export default {
         '0010016': 'imbank.png',
         '0014807': 'suhyupbank.png',    // 수협/신협 공용
         '0010019': 'gwangjubank.png',   // 광주/전북 공용
+        '0010022': 'gwangjubank.png',
+        '0010024': 'bnkbank.png',
+        '0011625': 'shinhanbank.png',
         '0013175': 'nhbank.png'
       }
     }
@@ -237,7 +240,7 @@ export default {
 .chip-sm {
   display: flex;
   align-items: center;
-  padding: 7px 12px;
+ 
   font-size: 13px;
 }
 
@@ -249,14 +252,14 @@ export default {
 }
 .chip-group.bank .chip {
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 36px;
 }
 .chip-group.bank .chip.chip-sm {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
+  padding: 8px 6px;
 }
 
 .bank-logo {
@@ -266,10 +269,5 @@ export default {
   margin-right: 6px;
 }
 
-/* 선택: 작은 화면에서 2열 */
-@media (max-width: 420px) {
-  .chip-group.bank {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
+
 </style>

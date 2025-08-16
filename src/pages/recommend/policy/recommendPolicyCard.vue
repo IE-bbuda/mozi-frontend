@@ -162,8 +162,7 @@ onMounted(() => {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 2px 8px #0001;
-  padding: 16px 18px 12px 18px;
-  margin-bottom: 16px;
+  padding: 8px 16px 8px 16px;
   width: 100%;
   position: relative;
 }
@@ -185,7 +184,7 @@ onMounted(() => {
 .card-header {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .policy-icon {
@@ -217,12 +216,12 @@ onMounted(() => {
 .card-body {
   font-size: 0.97rem;
   color: #444;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .info-section {
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .info-item {
@@ -243,7 +242,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .keywords-section {

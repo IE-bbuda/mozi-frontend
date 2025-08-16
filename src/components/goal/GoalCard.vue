@@ -164,14 +164,14 @@ const formatCurrency = (amount) => {
 .goal-card {
   background: white;
   border-radius: 12px;
-  padding: 10px 16px;
+  padding: 14px 18px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid #e9ecef;
   position: relative;
   width: 100%;
-  min-height: 55px;
+  min-height: 70px;
 }
 
 .goal-card:hover {
@@ -239,7 +239,7 @@ const formatCurrency = (amount) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .goal-info {
@@ -250,7 +250,7 @@ const formatCurrency = (amount) => {
 }
 
 .goal-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #333;
   margin: 0;
@@ -321,14 +321,14 @@ const formatCurrency = (amount) => {
 }
 
 .progress-section {
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .amount-info {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
   margin-bottom: 0;
 }
 

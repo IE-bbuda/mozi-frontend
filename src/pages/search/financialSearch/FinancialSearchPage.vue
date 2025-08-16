@@ -572,6 +572,11 @@ onMounted(() => {
   color: #64748b;
 }
 
+/* financial-card 스타일 - 이 페이지에서만 적용 */
+.financial-card {
+  margin-bottom: 16px;
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .filter-tags-container {
